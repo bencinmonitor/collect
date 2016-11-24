@@ -1,0 +1,5 @@
+cffi
+scrapy==1.2
+cryptography
+arrow
+pillow
