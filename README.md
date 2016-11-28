@@ -1,4 +1,6 @@
-# u3
+# bencinmonitor / collect
+
+Price collector and OCR for collected images.
 
 ## Setup
 
@@ -6,10 +8,51 @@ Prepare Python3 with virtualenv wrapper.
 
 ```bash
 PYTHON_PATH=/usr/local/Cellar/python3/3.5.2_1/bin/python3
-mkvirtualenv --no-site-packages --python=$PYTHON_PATH u3
-env LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" \
-  pip install --upgrade -r requirements.txt
+LDFLAGS="-L$(brew --prefix openssl)/lib"
+CFLAGS="-I$(brew --prefix openssl)/include"
+mkvirtualenv --no-site-packages --python=$PYTHON_PATH bm-collect
+pip install --upgrade -r requirements.txt
 ```
+
+## Crawling
+
+```bash
+zookeeper-server-start /usr/local/etc/kafka/zookeeper.properties; \
+kafka-server-start /usr/local/etc/kafka/server.properties
+
+afka-topics --create --zookeeper localhost:2181 \
+  --replication-factor 1 --partitions 1 --topic scraped-items
+
+kafka-console-consumer --bootstrap-server localhost:9092 --topic \
+  scraped-items --from-beginning
+
+scrapy crawl petrol -L INFO
+scrapy crawl omv -L INFO
+```
+
+## OCR
+
+By default OCR machine listens to `scraped-items` topic.
+
+```bash
+./ocr-machine.sh
+```
+
+For OCR development this also works.
+
+```bash
+./ocr-machine.sh --image ./data-test/petrol.jpg
+```
+
+## Exploring
+
+```bash
+ln -s /usr/local/opt/opencv3/lib/python3.5/site-packages/cv2.cpython-35m-darwin.so /Users/otobrglez/.virtualenvs/bm-collect/lib/python3.5/site-packages/
+
+brew install opencv3 --with-python3
+pip install jupyter numpy matplotlib
+```
+
 
 ## Contributors
 

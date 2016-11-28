@@ -1,40 +1,20 @@
 # -*- coding: utf-8 -*-
-import hashlib
-import os
-import os.path
-from scrapy.pipelines.files import FilesPipeline
-from scrapy.pipelines.images import ImagesPipeline
+from scrapy.utils.serialize import ScrapyJSONEncoder
 from collector.settings import *
+from kafka import KafkaProducer
+from json import dumps
 
 
-class StationsPipeline(object):
-    def __init__(self):
-        pass
+class StationsKafkaPipeline(object):
+    producer = None
+
+    def open_spider(self, spider):
+        self.producer = KafkaProducer(**{
+            'bootstrap_servers': KAFKA_BOOTSTRAP_SERVERS,
+            'value_serializer': lambda v: v.encode(),
+        })
 
     def process_item(self, item, spider):
-
-        if item.get('images'):
-            item['images'] = [i['path'] for i in item.get('images')]
-
-        if item.get('files'):
-            item['files'] = [i['path'] for i in item.get('files')]
-
+        item_as_json = dumps(item, cls=ScrapyJSONEncoder)
+        self.producer.send(KAFKA_SCRAPED_ITEMS_TOPIC, item_as_json)
         return item
-
-
-def custom_file_path(self, request, response=None, info=None):
-    url = '' + request.url
-    media_guid = hashlib.sha256(url.encode('utf-8')).hexdigest()
-
-    media_ext = os.path.splitext(url)[1]
-
-    if not media_ext[1:].isalpha():
-        media_base_url = url.split('?', 1)[0]
-        media_ext = os.path.splitext(media_base_url)[1]
-        if media_ext == '.php':
-            media_ext += '.pdf'
-
-    return '%s%s' % (media_guid, media_ext)
-
-
-FilesPipeline.file_path = custom_file_path

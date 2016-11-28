@@ -1,5 +1,7 @@
+Cython==0.24
 cffi
 scrapy==1.2
 cryptography
-arrow
 pillow
+tesserocr
+kafka-python

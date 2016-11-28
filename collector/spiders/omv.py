@@ -2,10 +2,8 @@
 from collector.spiders import CollectorSpider
 from collector.items import Station
 from scrapy import Request
-from arrow import utcnow as scraped_at
-from json import load, loads
-from pprint import pprint
-from pdb import set_trace
+from datetime import datetime
+from json import loads
 
 
 class OMV(CollectorSpider):
@@ -38,7 +36,7 @@ class OMV(CollectorSpider):
         address = "%s, %s %s, %s" % (record['address_l'], record['postcode'], record['town_l'], record['country_l'])
 
         return Station(**{
-            'scraped_at': scraped_at(),
+            'scraped_at': datetime.utcnow(),
             'scraped_url': response.url,
             'xid': record['sid'],
             'xcode': record['sid'],

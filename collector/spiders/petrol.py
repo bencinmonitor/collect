@@ -2,7 +2,7 @@
 from collector.spiders import CollectorSpider
 from collector.items import Station
 from scrapy import Request
-from arrow import utcnow as scraped_at
+from datetime import datetime
 
 
 class Petrol(CollectorSpider):
@@ -32,7 +32,7 @@ class Petrol(CollectorSpider):
 
     def parse_detail(self, response):
         station = Station(**{
-            'scraped_at': scraped_at(),
+            'scraped_at': datetime.utcnow(),
             'scraped_url': response.url,
             'xid': str(response.url.split('/')[-1]),
             'xcode': response.xpath("//span[contains(@class,'oem')]/text()").extract()[0].split(" ")[-1],
