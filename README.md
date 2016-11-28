@@ -46,10 +46,14 @@ For OCR development this also works.
 
 ## Exploring
 
-```bash
-ln -s /usr/local/opt/opencv3/lib/python3.5/site-packages/cv2.cpython-35m-darwin.so /Users/otobrglez/.virtualenvs/bm-collect/lib/python3.5/site-packages/
+- [Exploring OCR (notebook)](explore/exploring-images-v2.ipynb)
 
-brew install opencv3 --with-python3
+```bash
+brew install opencv3 --HEAD --with-python3 --c++11 --with-contrib
+
+ln -s /usr/local/opt/opencv3/lib/python3.5/site-packages/cv2.cpython-35m-darwin.so \
+  /Users/otobrglez/.virtualenvs/bm-collect/lib/python3.5/site-packages/
+
 pip install jupyter numpy matplotlib
 ```
 
