@@ -67,6 +67,12 @@ docker-compose -f ./docker-compose.yml -f ./docker-compose.local.yml up
 # docker run -ti -v `pwd`:/home/collect -p 6800:6800 bencinmonitor/collect /bin/bash -l
 ```
 
+# Test suite
+
+```bash
+python -m unittest discover -s test
+```
+
 ## Contributors
 
 - [Oto Brglez](https://github.com/otobrglez)

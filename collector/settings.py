@@ -63,7 +63,7 @@ ITEM_PIPELINES = {
     # 'feeder.pipelines.FilesPipeline': 1,
     # 'scrapy.pipelines.files.FilesPipeline': 1,
     'scrapy.pipelines.images.ImagesPipeline': 1,
-    'collector.pipelines.StationsKafkaPipeline': 2
+    'collector.pipelines.StationsRedisPipeline': 2
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -91,5 +91,9 @@ ITEM_PIPELINES = {
 IMAGES_STORE = "data"
 
 # Kafka
-KAFKA_BOOTSTRAP_SERVERS = getenv('KAFKA_BOOTSTRAP_SERVERS', None)
-KAFKA_SCRAPED_ITEMS_TOPIC = getenv('KAFKA_SCRAPED_ITEMS_TOPIC', 'scraped-items')
+# KAFKA_BOOTSTRAP_SERVERS = getenv('KAFKA_BOOTSTRAP_SERVERS', None)
+# KAFKA_SCRAPED_ITEMS_TOPIC = getenv('KAFKA_SCRAPED_ITEMS_TOPIC', 'scraped-items')
+
+
+REDIS_URL = getenv('REDIS_URL', '0.0.0.0:6379')
+REDIS_ITEMS_QUEUE = getenv('REDIS_ITEMS_QUEUE', 'default')

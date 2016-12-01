@@ -44,5 +44,7 @@ class OMV(CollectorSpider):
             'lon': record['x'],
             'name': name,
             'address': address,
-            'image_urls': response.xpath("//img[contains(@class,'preisImageClass')]/@src").extract()
+            'image_urls': response.xpath("//img[contains(@class,'preisImageClass')]/@src").extract(),
+            'key': "%s-%s" % (self.name, record['sid']),
+            'scraper': self.name
         })

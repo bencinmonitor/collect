@@ -1,8 +1,10 @@
+
 src/
 
 *.pid
 explore/.ipynb_checkpoints
 data
+data-redis
 !data/.gitkeeps3.conf
 
 *.zip
