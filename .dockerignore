@@ -1,1 +1,4 @@
 ./data/full
+./logs
+./tmp
+./dbs

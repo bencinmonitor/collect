@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from uuid import uuid4
 
 
 class Station(scrapy.Item):
@@ -13,3 +14,8 @@ class Station(scrapy.Item):
     lat = scrapy.Field()
     xid = scrapy.Field()  # ID on page
     xcode = scrapy.Field()  # Internal ID if possible
+    key = scrapy.Field()
+
+    @staticmethod
+    def generate_key():
+        return uuid4()

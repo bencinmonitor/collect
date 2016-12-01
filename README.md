@@ -57,6 +57,15 @@ ln -s /usr/local/opt/opencv3/lib/python3.5/site-packages/cv2.cpython-35m-darwin.
 pip install jupyter numpy matplotlib
 ```
 
+# Docker
+
+```bash
+docker build -t bencinmonitor/collect:latest .
+
+docker-compose -f ./docker-compose.yml -f ./docker-compose.local.yml up
+
+# docker run -ti -v `pwd`:/home/collect -p 6800:6800 bencinmonitor/collect /bin/bash -l
+```
 
 ## Contributors
 

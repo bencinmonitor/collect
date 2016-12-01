@@ -1,5 +1,7 @@
-explore/.ipynb_checkpoints
+src/
 
+*.pid
+explore/.ipynb_checkpoints
 data
 !data/.gitkeeps3.conf
 
@@ -11,6 +13,8 @@ creds.txt
 tools/h_*.sh
 
 tmp/
+logs/
+dbs/
 
 # feeder specific
 db/*
