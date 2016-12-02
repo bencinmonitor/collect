@@ -14,39 +14,18 @@ mkvirtualenv --no-site-packages --python=$PYTHON_PATH bm-collect
 pip install --upgrade -r requirements.txt
 ```
 
-## Crawling
+## Crawling & Processing
 
 ```bash
-zookeeper-server-start /usr/local/etc/kafka/zookeeper.properties; \
-kafka-server-start /usr/local/etc/kafka/server.properties
-
-afka-topics --create --zookeeper localhost:2181 \
-  --replication-factor 1 --partitions 1 --topic scraped-items
-
-kafka-console-consumer --bootstrap-server localhost:9092 --topic \
-  scraped-items --from-beginning
+redis-server ./etc/redis.conf
 
 scrapy crawl petrol -L INFO
 scrapy crawl omv -L INFO
+
+python -m ocr_machine.workers default
 ```
 
-## OCR
-
-By default OCR machine listens to `scraped-items` topic.
-
-```bash
-./ocr-machine.sh
-```
-
-For OCR development this also works.
-
-```bash
-./ocr-machine.sh --image ./data-test/petrol.jpg
-```
-
-## Exploring
-
-- [Exploring OCR (notebook)](explore/exploring-images-v2.ipynb)
+## Notes
 
 ```bash
 brew install opencv3 --HEAD --with-python3 --c++11 --with-contrib
@@ -59,12 +38,20 @@ pip install jupyter numpy matplotlib
 
 # Docker
 
+> In progress,...
+
 ```bash
 docker build -t bencinmonitor/collect:latest .
 
 docker-compose -f ./docker-compose.yml -f ./docker-compose.local.yml up
 
 # docker run -ti -v `pwd`:/home/collect -p 6800:6800 bencinmonitor/collect /bin/bash -l
+```
+
+# Test suite
+
+```bash
+python -m unittest discover -s test
 ```
 
 ## Contributors

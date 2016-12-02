@@ -6,6 +6,7 @@ from uuid import uuid4
 class Station(scrapy.Item):
     scraped_at = scrapy.Field()
     scraped_url = scrapy.Field()
+    scraper = scrapy.Field()
     images = scrapy.Field()
     image_urls = scrapy.Field()
     name = scrapy.Field()

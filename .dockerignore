@@ -1,3 +1,4 @@
+./data-redis
 ./data/full
 ./logs
 ./tmp

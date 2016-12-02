@@ -37,8 +37,11 @@ class Petrol(CollectorSpider):
             'xid': str(response.url.split('/')[-1]),
             'xcode': response.xpath("//span[contains(@class,'oem')]/text()").extract()[0].split(" ")[-1],
             'name': response.css("h1.page-title::text").extract()[0],
-            'address': response.css("span.address::text").extract()[0]
+            'address': response.css("span.address::text").extract()[0],
+            'scraper': self.name
         })
+
+        station['key'] = "%s-%s-%s" % (self.name, station['xid'], station['xcode'])
 
         prices_image = "//div[contains(@id, 'bsDetails')]" \
                        "//img[contains(@src,'files')]" \

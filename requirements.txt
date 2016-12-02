@@ -6,5 +6,8 @@ git+https://github.com/scrapy/scrapyd-client.git@python3-wip#egg=scrapyd-client
 cryptography
 pillow
 tesserocr
-kafka-python
+rq
+redis
 circus
+fuzzywuzzy
+python-Levenshtein
