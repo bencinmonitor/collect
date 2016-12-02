@@ -1,137 +1,71 @@
 from json import loads, load
-import cv2
-from PIL import Image
-from tesserocr import PyTessBaseAPI
-from fuzzywuzzy import fuzz, process
-import itertools
-from os import getenv
+from ocr_machine.ocr import ocr_pipeline
 import re
-
-TESSEDIT_CHAR_WHITELIST = "čČabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0987654321-.,:/"
-PHRASES_LIST = ['Kurilno', 'olje', 'EL', 'OMV', 'Petrol', 'Diesel', 'MaxxMotion', 'EUR', 'Datum/Čas',
-                'Max', 'LPG', 'futurPlus', 'futur', 'Plus', 'Q', 'Q Max', 'OMV Diesel', 'Max Diesel']
-WORDS_LIST = list(set(itertools.chain(*map(lambda w: w.split(), PHRASES_LIST))))
 
 
 def process_station(station_as_json):
-    station = loads(station_as_json, 'utf8')
-    print("Processing station: \"%s\"" % station['name'])
-    r = 10 / 0
-
-
-def ocr_pipeline(image_paths):
-    return post_process(ocr(pre_process(image_paths)))
-
-
-def pre_process(image_paths, min_f=2.40, max_f=2.30):
-    return [pre_process_image(path, min_f=2.40, max_f=2.30) for path in image_paths]
-
-
-def pre_process_image(path, min_f=2.40, max_f=2.30):
-    image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-
-    original_width = image.shape[1]
-    if original_width < 400:
-        base_width = int(original_width * min_f)
+    if isinstance(station_as_json, (str)):
+        station = loads(station_as_json, 'utf8')
+    elif isinstance(station_as_json, dict):
+        station = station_as_json
     else:
-        base_width = int(original_width * max_f)
+        raise Exception('Station can only be "hash" or "json"')
 
-    w_ratio = float(base_width) / float(image.shape[1])
-    h_size = int((float(image.shape[0]) * float(w_ratio)))
+    result = ocr_pipeline([images['path'] for images in station['images']])
+    out_texts = ' '.join([x['out_text'] for x in result])
 
-    image_resized = cv2.resize(image, (base_width, h_size), interpolation=cv2.INTER_NEAREST)
-    _, image_resized = cv2.threshold(image_resized, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    prices = process_prices(station, out_texts)
 
-    return Image.fromarray(image_resized)
+    return prices
 
 
-def ocr(images):
-    results = []
-    with PyTessBaseAPI(lang='slv') as api:
-        api.SetVariable("tessedit_char_whitelist", TESSEDIT_CHAR_WHITELIST)
-        api.SetVariable("classify_enable_learning", "0")
-        api.SetVariable("classify_enable_adaptive_matcher", "0")
-        api.SetVariable("load_system_dawg", "0")
-        api.SetVariable("load_freq_dawg", "0")
+def process_prices(station, text):
+    if station['scraper'] is 'petrol':
+        result = process_petrol_prices(station, text)
+    elif station['scraper'] is 'omv':
+        result = process_omv_prices(station, text)
+    else:
+        raise Exception('Processing of "%s" is not yet supported.' % station['scraper'])
 
-        for image in images:
-            api.SetImage(image)
+    return result
 
-            results.append({
-                'words_confidences': api.AllWordConfidences(),
-                'words': api.AllWords(),
-                'text': api.GetUTF8Text(),
-            })
 
-    return results
+PETROL_FUEL_NAMES = [
+    ('Q Max 95', ("max 95", re.IGNORECASE)),
+    ('Q Max 100', ("max 100", re.IGNORECASE)),
+    ('Q Max Diesel', ("diesel", re.IGNORECASE)),
+    ('Q Max LPG', ("LPG", re.IGNORECASE)),
+    ('Kurilno olje EL', ("kurilno|olje", re.IGNORECASE))
+]
 
+
+def process_petrol_prices(station, text, names=PETROL_FUEL_NAMES):
+    prices = [float(x.replace(",", ".", 1)) for x in re.findall(r"(\d{1},\d{3,3})", text)]
+    labels = [k for k, (pattern, flags) in names if re.search(pattern, text, flags)]
+    result = dict(zip(labels, prices))
+    return result
+
+
+OMV_FUEL_NAMES = [
+    ('MaxxMotion 95', (r"(\b95\b|motion\s9)", re.IGNORECASE)),
+    ('OMV AdBlue', (r"AdBlue|blue", re.IGNORECASE)),
+    ('MaxxMotion 100', (r"(\b100\b|motion\s1)", re.IGNORECASE)),
+    ('Kurilno olje OMV futurPlus', (r"kurilno|olje|futur|plus", re.IGNORECASE)),
+    ('OMV Avtoplin (LPG)', (r"LPG|\W+plin", re.IGNORECASE)),
+    ('OMV Diesel', (r"diesel", re.IGNORECASE)),
+]
 
 from pprint import pprint
 
 
-def should_replace(ocr_confidence, fuzzy_confidence, replacement_thresholds=(60, 60)):
-    """ This method could eventually be improved with machine learning model (or ID3) """
-    ocr_confidence_threshold, fuzzy_confidence_threshold = replacement_thresholds
+def process_omv_prices(station, text, names=OMV_FUEL_NAMES):
+    print('"%s' % text)
+    prices = [float(x.replace(",", ".", 1)) for x in re.findall(r"(\d{1},\d{3,3})", text)]
+    labels = [k for k, (pattern, flags) in names if re.search(pattern, text, flags)]
 
-    ocr_beyond = ocr_confidence >= ocr_confidence_threshold
-    ocr_lower = ocr_confidence < ocr_confidence_threshold
+    if len(labels) != len(prices):
+        print('Problem with "%s"' % (text), prices, labels)
+        return {}
 
-    fuzzy_beyond = fuzzy_confidence >= fuzzy_confidence_threshold
-    fuzzy_lower = fuzzy_confidence < fuzzy_confidence_threshold
-
-    if ocr_lower and fuzzy_beyond:
-        return True
-
-    if ocr_beyond and fuzzy_beyond:
-        return True
-    return False
-
-
-def post_text_process(nodes, debug=False, word_list=WORDS_LIST):
-    fuzzy_confidences = [{'fuzzy_confidences': [process.extractOne(word, word_list) for word in node['words']]} for
-                         node in nodes]
-    results = [{**a, **b} for a, b in list(zip(nodes, fuzzy_confidences))]
-
-    for index, result in enumerate(results):
-        replacements = [(ocr_conf, fuzzy_conf, fuzzy_word, should_replace(ocr_conf, fuzzy_conf)) for
-                        (ocr_conf, (fuzzy_word, fuzzy_conf)) in
-                        zip(result['words_confidences'], result['fuzzy_confidences'])]
-        results[index]['replacements'] = replacements
-
-    if debug or (getenv("DEBUG_POST_PROCESS", "0") is "1"):
-        print("----- post_process DEBUG START -----")
-
-        for result in results:
-            for word, replacement in zip(result['words'], result['replacements']):
-                out_word = word
-
-                if replacement[3]:
-                    out_word = replacement[2]
-
-                print("%s\t%d\t%d\t%s\t%s" % (
-                    out_word.strip(), replacement[0], replacement[1], replacement[2], replacement[3]))
-
-        print("----- post_process DEBUG STOP -----")
-
-    for index, result in enumerate(results):
-        out_words = [fuzzy_word if should_be_replaced else word for
-                     word, (ocr_conf, fuzzy_conf, fuzzy_word, should_be_replaced) in zip(result['words'],
-                                                                                         result['replacements'])]
-
-        results[index]['post_text'] = ' '.join(out_words)
-
-    return results
-
-
-def numbers_fixing(text):
-    return re.sub(r"(\d{1})\s*[\.\,]?(\d{3,3})\s\b", r"\1,\2 ", text)
-
-
-def post_number_fixer(nodes, debug=True):
-    return [{**node, **{'out_text': numbers_fixing(node['post_text'])}} for node in nodes]
-
-
-def post_process(nodes, debug_text=False, debug_numbers=False, word_list=WORDS_LIST):
-    nodes = post_text_process(nodes, debug=debug_text, word_list=word_list)
-    nodes = post_number_fixer(nodes, debug=debug_numbers)
-    return nodes
+    result = dict(zip(labels, prices))
+    return result
