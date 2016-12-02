@@ -103,8 +103,17 @@ def post_text_process(nodes, debug=False, word_list=WORDS_LIST):
 
 def numbers_fixing(text):
     """ Tries to fix things that look like numbers with Regular expressions. """
-    text = re.sub(r"(\d{1})\s*[.,]?(\d{3,3})\s\b", r"\1,\2 ", text + " ")
-    return re.sub(r"(\d{1})(\d{3,3})\s", r"\1,\2", text).strip()
+
+    # 1. Remove date to prevent future fuckups.
+    text = re.sub("\d{4}-\d{2}-\d{2}\s+\d{2}\:\d{2}", "YMD-HIS", text)
+
+    # 2. Get potential 3 digit screwups and fix them.
+    pre_post = re.sub(r"\.?\,?(\d{1})\-*(\d{2,2})\s", r"\1\2 ", text + " ")
+
+    # 3. Get 4 digit screwups and fix them.
+    post_text = re.sub(r"(\d{1})\s*\.?\,?\s*(\d{3,3})\s*\b", r"\1,\2 ", pre_post + " ")
+
+    return post_text.strip()
 
 
 def post_number_fixer(nodes, debug=True):

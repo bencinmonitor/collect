@@ -5,7 +5,7 @@ from ocr_machine.ocr import *
 from test.helpers import build_station, stations
 
 
-class ProcessorTest(unittest.TestCase):
+class TestOCR(unittest.TestCase):
     def test_building_payload(self):
         station = build_station({'xid': "test"})
         self.assertEqual(station['xid'], "test")
@@ -16,7 +16,7 @@ class ProcessorTest(unittest.TestCase):
             self.assertEqual(1, len(pre_process_result))
 
     def test_ocr(self):
-        images = [pre_process_image(file_path) for file_path in glob.glob('./data-test/*.jpg')[0:1]]
+        images = [pre_process_image(file_path) for file_path in glob.glob('./data-test/*small*.jpg')[0:1]]
         texts = ocr(images)
         self.assertEqual(len(texts), 1)
         self.assertIn('Kurilno', texts[0]['text'])
@@ -27,9 +27,17 @@ class ProcessorTest(unittest.TestCase):
         post_process_results = post_process(nodes, debug_numbers=True)
 
         for node in post_process_results:
-            # print('"%s"' % node['out_text'])
             self.assertRegex(node['out_text'], r"\d{1},\d{3,3}")
-        self.assertEqual(len(nodes), 6)
+
+    def test_numbers_fixing(self):
+        self.assertEqual("1,000", numbers_fixing("1000"))
+        self.assertEqual("1,000", numbers_fixing("1.000"))
+        self.assertEqual("1,000", numbers_fixing("1,000"))
+        self.assertEqual("1,000", numbers_fixing("1 ,000"))
+        self.assertEqual("1,000", numbers_fixing("1 .000"))
+        self.assertEqual("1,000", numbers_fixing("1 .0-00"))
+        self.assertEqual("YMD-HIS test", numbers_fixing("2016-31-12 23:59 test"))
+        self.assertEqual("YMD-HIS test 1,000", numbers_fixing("2016-31-12 23:59 test 1.0-00"))
 
 
 if __name__ == '__main__':

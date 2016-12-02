@@ -24,15 +24,23 @@ class TestProcessor(unittest.TestCase):
 
     def test_processor_omv(self):
         path = "./data-test/omv*.jpg"
-        # path = "./data/full/*.jpg"
-        # path = "./data-test/x-complex*"
-
-        stations_data = [station for station in stations(path, options={'scraper': 'omv'})][0:4]
+        path = "./data-test/omv-complex*"
+        stations_data = [station for station in stations(path, options={'scraper': 'omv'})]
         results = [process_station(station) for station in stations_data]
 
-        pprint(results)
-        # print("-----")
-        # print(dumps(results))
+        first_result = results[0]
+        self.assertEqual(first_result['OMV Avtoplin (LPG)'], 0.613)
+        self.assertEqual(first_result['OMV Diesel'], 1.110)
+
+    def test_processor_with_merge(self):
+        path = "./data-test/omv*.jpg"
+        station = build_station({
+            'scraper': 'omv',
+            'images': [{'path': f_path} for f_path in glob.glob(path)]
+        })
+
+        prices = process_station(station)
+        self.assertEqual(prices['OMV Diesel'], 1.110)
 
 
 if __name__ == '__main__':
