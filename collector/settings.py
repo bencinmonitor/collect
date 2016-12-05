@@ -21,7 +21,7 @@ DOWNLOAD_DELAY = int(getenv("DOWNLOAD_DELAY", "2"))
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
-DOWNLOAD_TIMEOUT = 30
+DOWNLOAD_TIMEOUT = 60
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = False
@@ -94,6 +94,6 @@ IMAGES_STORE = "data"
 # KAFKA_BOOTSTRAP_SERVERS = getenv('KAFKA_BOOTSTRAP_SERVERS', None)
 # KAFKA_SCRAPED_ITEMS_TOPIC = getenv('KAFKA_SCRAPED_ITEMS_TOPIC', 'scraped-items')
 
-
-REDIS_URL = getenv('REDIS_URL', '0.0.0.0:6379')
+REDIS_WORK_URL = getenv('REDIS_WORK_URL', 'redis://@0.0.0.0:6379/0')
+REDIS_DATA_URL = getenv('REDIS_DATA_URL', 'redis://@0.0.0.0:6379/1')
 REDIS_ITEMS_QUEUE = getenv('REDIS_ITEMS_QUEUE', 'default')

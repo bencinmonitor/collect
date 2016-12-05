@@ -3,16 +3,14 @@ services:
   collect:
     image: bencinmonitor/collect:latest
     links:
-      - kafka
-      - zookeeper
+      - redis:redis
+    depends_on:
+      - redis
+    environment:
+      - REDIS_WORK_URL=redis://@redis:6379/0
+      - REDIS_DATA_URL=redis://@redis:6379/1
     restart: unless-stopped
 
-  zookeeper:
-    image: wurstmeister/zookeeper:3.4.6
+  redis:
+    image: redis:3.0
     restart: unless-stopped
-
-  kafka:
-    image: wurstmeister/kafka:0.10.0.1
-    restart: unless-stopped
-    links:
-      - zookeeper

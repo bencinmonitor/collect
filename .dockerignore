@@ -1,5 +1,9 @@
-./data-redis
-./data/full
-./logs
-./tmp
-./dbs
+data-redis
+data/full
+collect.egg-info
+dbs
+tmp
+eggs
+project.egg-info
+logs
+build
