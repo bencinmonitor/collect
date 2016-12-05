@@ -38,14 +38,12 @@ pip install jupyter numpy matplotlib
 
 # Docker
 
-> In progress,...
-
 ```bash
 docker build -t bencinmonitor/collect:latest .
 
 docker-compose -f ./docker-compose.yml -f ./docker-compose.local.yml up
 
-# docker run -ti -v `pwd`:/home/collect -p 6800:6800 bencinmonitor/collect /bin/bash -l
+curl http://localhost:6800/schedule.json -d project=collector -d spider=petrol
 ```
 
 # Test suite
