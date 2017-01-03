@@ -1,3 +1,8 @@
+*.pid
+*.log
+.env
+
+images/
 data-redis
 data/full
 collect.egg-info

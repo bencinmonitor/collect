@@ -3,6 +3,9 @@ FROM ubuntu:16.04
 MAINTAINER Oto Brglez <otobrglez@gmail.com>
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+ENV LANGUAGE=C.UTF-8
 
 RUN apt-get update -qq && \
   apt-get install -qqy \
@@ -41,8 +44,9 @@ RUN mkdir -p /home/collect/data/full
 ADD . /home/collect
 
 # Project Python dependencies
-RUN pip install Cython==0.24 && \
-  pip install --no-binary --no-use-wheel --no-cache-dir -r /home/collect/requirements.txt
+RUN pip install --disable-pip-version-check Cython==0.24 && \
+  pip install --no-binary --no-use-wheel --no-cache-dir --disable-pip-version-check \
+  -r /home/collect/requirements.txt
 
 RUN apt-get clean -qq && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /src/opencv
 

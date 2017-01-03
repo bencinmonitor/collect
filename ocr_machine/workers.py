@@ -12,4 +12,4 @@ if __name__ == '__main__':
         qs = sys.argv[1:] or ['default']
 
         w = Worker(qs)
-        w.work(logging_level="DEBUG")
+        w.work(logging_level='DEBUG')
