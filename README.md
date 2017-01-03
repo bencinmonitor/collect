@@ -1,6 +1,6 @@
 # bencinmonitor / collect
 
-Price collector and OCR for collected images.
+Oil and gas price collector.
 
 ## Setup
 
@@ -14,16 +14,14 @@ mkvirtualenv --no-site-packages --python=$PYTHON_PATH bm-collect
 pip install --upgrade -r requirements.txt
 ```
 
-## Crawling & Processing
+# Running with Docker
 
 ```bash
-redis-server ./etc/redis.conf
+docker build -t bencinmonitor/collect:latest .
 
-scrapy crawl petrol -L INFO
-scrapy crawl omv -L INFO
-
-python -m ocr_machine.workers default
+docker-compose -f docker-compose.yml -f docker-compose.local.yml up
 ```
+
 
 ## Notes
 
@@ -36,15 +34,6 @@ ln -s /usr/local/opt/opencv3/lib/python3.5/site-packages/cv2.cpython-35m-darwin.
 pip install jupyter numpy matplotlib
 ```
 
-# Docker
-
-```bash
-docker build -t bencinmonitor/collect:latest .
-
-docker-compose -f ./docker-compose.yml -f ./docker-compose.local.yml up
-
-curl http://localhost:6800/schedule.json -d project=collector -d spider=petrol
-```
 
 # Test suite
 

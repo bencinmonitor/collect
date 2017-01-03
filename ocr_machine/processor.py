@@ -1,35 +1,33 @@
+# -*- coding:utf-8 -*-
+
 import re
 from json import loads
-from pprint import pprint
-
 from ocr_machine.ocr import ocr_pipeline
 from utils.meta import PETROL_FUEL_NAMES, OMV_FUEL_NAMES
+from os.path import realpath, dirname, join, exists
 
 
-def process_station(station_as_json):
-    """ Processes station and it stores it into REDIS. """
-    if isinstance(station_as_json, (str)):
-        station = loads(station_as_json, 'utf8')
-    elif isinstance(station_as_json, dict):
-        station = station_as_json
-    else:
-        raise Exception('Station can only be "hash" or "json"')
-
+def process_station(station_as_string):
+    station = loads(station_as_string, encoding='utf8')
     prices = compute_prices(station)
-    pprint(prices)
-
     return prices
 
 
-def fix_image_path(path, pre_path="./data/"):
+def fix_image_path(path):
+    images_path = join(dirname(dirname(realpath(__file__))), "data")
+    final_path = path
+
     if path.startswith("full/"):
-        return pre_path + path
-    else:
-        return path
+        final_path = join(images_path, path)
+
+    if not exists(final_path):
+        raise Exception('Image path %s does NOT exist!' % final_path)
+
+    return final_path
 
 
 def compute_prices(station):
-    result = ocr_pipeline([fix_image_path(images['path']) for images in station['images']])
+    result = ocr_pipeline([fix_image_path(image['path']) for image in station['images']])
     prices_list = [process_prices(station, out_text['out_text']) for out_text in result]
     prices = {k: v for d in prices_list for k, v in d.items()}
     return prices

@@ -1,15 +1,71 @@
 version: '2'
+
+volumes:
+  images:
+
 services:
-  collect:
-    image: bencinmonitor/collect:latest
+  scrape_petrol:
+    image: bencinmonitor/collect
+    links:
+      - redis
+    depends_on:
+      - redis
+      - ocr_worker
+    environment:
+      - REDIS_WORK_URL=redis://@redis:6379/0
+      - REDIS_DATA_URL=redis://@redis:6379/1
+      - SLEEP_TIME=10
+    volumes:
+      - images:/home/collect/data/full
+    entrypoint: "bash"
+    command: "./bin/run-sleep.sh scrapy crawl petrol -L INFO"
+    restart: unless-stopped
+
+  scrape_omv:
+    image: bencinmonitor/collect
+    links:
+      - redis
+    depends_on:
+      - redis
+      - ocr_worker
+    environment:
+      - REDIS_WORK_URL=redis://@redis:6379/0
+      - REDIS_DATA_URL=redis://@redis:6379/1
+      - SLEEP_TIME=10
+    volumes:
+      - images:/home/collect/data/full
+    command: "./bin/run-sleep.sh scrapy crawl petrol -L INFO"
+    restart: unless-stopped
+
+  ocr_worker:
+    image: bencinmonitor/collect
+    links:
+      - redis
+    depends_on:
+      - redis
+    environment:
+      - PYTHONIOENCODING=utf-8
+      - LC_ALL=C.UTF-8
+      - LANG=C.UTF-8
+      - REDIS_WORK_URL=redis://@redis:6379/0
+      - REDIS_DATA_URL=redis://@redis:6379/1
+    volumes:
+      - images:/home/collect/data/full
+    entrypoint: "python"
+    command: "-m ocr_machine.workers default"
+    restart: unless-stopped
+
+  rq_monitor:
+    image: bencinmonitor/collect
     links:
       - redis:redis
     depends_on:
       - redis
     environment:
-      - REDIS_WORK_URL=redis://@redis:6379/0
-      - REDIS_DATA_URL=redis://@redis:6379/1
-    restart: unless-stopped
+      - PYTHONIOENCODING=utf-8
+      - LC_ALL=C.UTF-8
+      - LANG=C.UTF-8
+    command: "rq-dashboard --redis-host redis --redis-port 6379 --redis-database 0 --bind 0.0.0.0"
 
   redis:
     image: redis:3.0

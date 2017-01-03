@@ -1,11 +1,25 @@
 version: '2'
+
 services:
-  collect:
-    build: .
+  scrape_petrol:
     volumes:
       - .:/home/collect
+    command: "./bin/run-sleep.sh scrapy crawl petrol -L DEBUG"
+
+  scrape_omv:
+    volumes:
+      - .:/home/collect
+    command: "./bin/run-sleep.sh scrapy crawl petrol -L DEBUG"
+
+  ocr_worker:
+    volumes:
+      - .:/home/collect
+
+  rq_monitor:
     ports:
-      - "6800:6800"
+      - 9181:9181
+    volumes:
+      - .:/home/collect
 
   redis:
     ports:
