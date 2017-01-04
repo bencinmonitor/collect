@@ -1,5 +1,13 @@
 .PHONY: clean docker-clean docker-clean-volumes
 
+COLLECT_IMAGE=bencinmonitor/collect
+
+docker-up-local:
+	docker-compose -f ./docker-compose.yml -f ./docker-compose.local.yml up
+
+build:
+	docker build -t $(COLLECT_IMAGE):latest .
+
 docker-clean-volumes:
 	docker volume ls -q | xargs -n1 docker volume rm
 
