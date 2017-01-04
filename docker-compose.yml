@@ -34,7 +34,7 @@ services:
       - SLEEP_TIME=10
     volumes:
       - images:/home/collect/data/full
-    command: "./bin/run-sleep.sh scrapy crawl petrol -L INFO"
+    command: "./bin/run-sleep.sh scrapy crawl omv -L INFO"
     restart: unless-stopped
 
   ocr_worker:

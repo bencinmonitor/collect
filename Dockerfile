@@ -48,7 +48,8 @@ RUN pip install --disable-pip-version-check Cython==0.24 && \
   pip install --no-binary --no-use-wheel --no-cache-dir --disable-pip-version-check \
   -r /home/collect/requirements.txt
 
-RUN apt-get clean -qq && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /src/opencv
+RUN apt-get clean -qq && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# /src/opencv
 
 WORKDIR /home/collect
 

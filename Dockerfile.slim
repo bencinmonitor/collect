@@ -1,0 +1,28 @@
+FROM ubuntu:16.04
+
+MAINTAINER Oto Brglez <otobrglez@gmail.com>
+
+ENV DEBIAN_FRONTEND=noninteractive \
+  LC_ALL=C.UTF-8 \
+  LANG=C.UTF-8 \
+  LANGUAGE=C.UTF-8
+
+RUN apt-get update -qy && \
+  apt-get install -qy \
+  python3 python3-pip python3-cffi python3-numpy \
+  tesseract-ocr libtesseract-dev libleptonica-dev tesseract-ocr-dev \
+  tesseract-ocr-slv tesseract-ocr-eng && \
+  update-alternatives --install /usr/bin/python python /usr/bin/python3 10 && \
+  update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10
+
+ADD ./lib/libopencv.tar.gz /tmp/
+RUN cp --no-dereference /tmp/libopencv/lib* /usr/local/lib/ && \
+  cp /tmp/libopencv/python*/* /usr/local/lib/python3.5/ && \
+  ldconfig
+
+ADD . /home/collect
+
+WORKDIR /home/collect
+
+# /home/collect/lib/libopencv/*lib* /usr/local/lib/
+# cp /home/collect/lib/libopencv/python3/cv2.cpython-35m-x86_64-linux-gnu.so /usr/local/lib/python3.5/

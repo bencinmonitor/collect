@@ -40,6 +40,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+!lib/libopencv.tar.gz
 lib64/
 parts/
 sdist/

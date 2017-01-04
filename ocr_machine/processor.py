@@ -28,32 +28,31 @@ def save_station(station):
     key = station['key']
     name = station['name']
     scraped_at = station['scraped_at']
-    timestamp = datetime.strptime(scraped_at, '%Y-%m-%d %H:%M:%S').timestamp()
+    timestamp = int(datetime.strptime(scraped_at, '%Y-%m-%d %H:%M:%S').timestamp())
 
-    pprint(station)
+    # pprint(station)
 
-    print("----------------")
-
-    # print(FUEL_NAMES)
-    pprint(FUEL_CODES)
-    pprint(REVERSED_FUEL_CODES)
-
-
-    # pprint(REVERSE_FUEL_CODES)
-    print("------------------")
-
-    # 1. meta
+    # 1. Current / Meta
     r.hmset('stations:meta:%s' % key, flatten_dict({
+        'key': key,
         'name': name,
+        'address': station['address'],
         'xcode': station['xcode'],
         'xid': station['xid'],
-        'prices': station['prices']
-    }))
+        'prices': {FUEL_CODES[k]: v for k, v in station['prices'].items()},
+        'lat': station['lat'],
+        'lon': station['lon'],
+        'scraped_at': timestamp,
+        'scraped_url': station['scraped_url']
+    }, separator=":"))
 
-    print(key)
-    print(scraped_at)
-    print(timestamp)
+    # Prices
+    for price_name, value in station['prices'].items():
+        price_code = FUEL_CODES[price_name]
+        r.zadd("stations:prices:%s:%s" % (key, price_code), value, timestamp)
 
+    # Price at location
+    r.execute_command("GEOADD", "locations", station['lat'], station['lon'], key)
 
 def fix_image_path(path):
     images_path = join(dirname(dirname(realpath(__file__))), "data")
