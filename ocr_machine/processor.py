@@ -3,14 +3,56 @@
 import re
 from json import loads
 from ocr_machine.ocr import ocr_pipeline
-from utils.meta import PETROL_FUEL_NAMES, OMV_FUEL_NAMES
+from utils.meta import PETROL_FUEL_NAMES, OMV_FUEL_NAMES, FUEL_NAMES, FUEL_CODES, REVERSED_FUEL_CODES
 from os.path import realpath, dirname, join, exists
+from pprint import pprint
+from redis import from_url
+from datetime import datetime
+from collector.settings import REDIS_DATA_URL
+from utils.dict import flatten_dict
+
+r = from_url(REDIS_DATA_URL)
 
 
 def process_station(station_as_string):
     station = loads(station_as_string, encoding='utf8')
     prices = compute_prices(station)
+
+    station['prices'] = prices
+    save_station(station)
+
     return prices
+
+
+def save_station(station):
+    key = station['key']
+    name = station['name']
+    scraped_at = station['scraped_at']
+    timestamp = datetime.strptime(scraped_at, '%Y-%m-%d %H:%M:%S').timestamp()
+
+    pprint(station)
+
+    print("----------------")
+
+    # print(FUEL_NAMES)
+    pprint(FUEL_CODES)
+    pprint(REVERSED_FUEL_CODES)
+
+
+    # pprint(REVERSE_FUEL_CODES)
+    print("------------------")
+
+    # 1. meta
+    r.hmset('stations:meta:%s' % key, flatten_dict({
+        'name': name,
+        'xcode': station['xcode'],
+        'xid': station['xid'],
+        'prices': station['prices']
+    }))
+
+    print(key)
+    print(scraped_at)
+    print(timestamp)
 
 
 def fix_image_path(path):

@@ -12,3 +12,4 @@ redis
 circus
 fuzzywuzzy
 python-Levenshtein
+python-slugify

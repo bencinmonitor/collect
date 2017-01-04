@@ -1,4 +1,6 @@
 import re, glob
+from json import dumps
+from scrapy.utils.serialize import ScrapyJSONEncoder
 
 STATION_IMAGES = ['omv.jpg',
                   'omv-small.jpg',
@@ -23,15 +25,19 @@ def build_station(options=None):
         "image_urls": [
             "http://www.petrol.si/...d65af4f0.jpg"
         ],
-        "name": "BS Ptuj - Ormo\\u0161ka 26/b",
+        "name": "BS Ptuj - Ormoška 26/b",
         "scraped_at": "2016-12-01 10:23:33",
         "scraper": "petrol",
-        "address": "Ormo\\u0161ka cesta 26b, 2250 Ptuj",
+        "address": "Ormoška cesta 26b, 2250 Ptuj",
         "lat": 46.41676013,
         "lon": 15.88049476,
         "xid": "1720"
     }
     return {**defaults, **options}
+
+
+def station_as_json(station):
+    return dumps(station, cls=ScrapyJSONEncoder, ensure_ascii=False)
 
 
 def key_from_string(text):
