@@ -36,6 +36,7 @@ WORKDIR /home/collect
 
 VOLUME /home/collect/data/full
 
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get clean && apt-get purge -y --auto-remove && \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENTRYPOINT ["scrapy"]
