@@ -1,0 +1,21 @@
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+install: true
+
+before_script:
+  - echo "Travis branch is $TRAVIS_BRANCH"
+  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker build -t bencinmonitor/collect .
+
+script:
+  - docker-compose -f docker-compose.test.yml run scraper
+
+after_script:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker push bencinmonitor/collect:latest;
+    fi

@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  scraper:
+    image: bencinmonitor/collect
+    links:
+      - redis
+    depends_on:
+      - redis
+    environment:
+      - REDIS_WORK_URL=redis://@redis:6379/0
+      - REDIS_DATA_URL=redis://@redis:6379/1
+      - SLEEP_TIME=0
+    volumes:
+      - .:/home/collect
+    entrypoint: "python"
+    command: "-m unittest"
+
+  redis:
+    image: redis:3.2
+    restart: unless-stopped
