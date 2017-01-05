@@ -2,15 +2,18 @@
 
 Oil and gas price collector.
 
+[![Build Status](https://travis-ci.org/bencinmonitor/collect.svg?branch=master)](https://travis-ci.org/bencinmonitor/collect)
+
 # Running with Docker
 
 ```bash
 docker build -t bencinmonitor/collect:latest .
 
 docker-compose -f docker-compose.yml -f docker-compose.local.yml up
+
 ```
 
-## Local setuo notes
+## Local setup notes
 
 Prepare Python3 with virtualenv wrapper.
 
