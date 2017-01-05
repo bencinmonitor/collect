@@ -1,8 +1,6 @@
 Cython==0.24
 cffi
 scrapy==1.2
-git+https://github.com/scrapy/scrapyd.git@python3-wip#egg=scrapyd
-git+https://github.com/scrapy/scrapyd-client.git@python3-wip#egg=scrapyd-client
 cryptography
 pillow
 tesserocr

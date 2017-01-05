@@ -9,7 +9,7 @@ services:
   scrape_omv:
     volumes:
       - .:/home/collect
-    command: "./bin/run-sleep.sh scrapy crawl petrol -L DEBUG"
+    command: "./bin/run-sleep.sh scrapy crawl omv -L DEBUG"
 
   ocr_worker:
     volumes:

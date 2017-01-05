@@ -3,8 +3,12 @@
 .env
 
 images/
-data-redis
+data-redis/
 data/full
+data/dump.rdb
+data/stdout
+explore/
+
 collect.egg-info
 dbs
 tmp

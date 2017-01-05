@@ -4,6 +4,6 @@ set -ex
 while true; do
   $@
   echo "Sleeping with " $SLEEP_TIME
-  sleep
+  sleep $SLEEP_TIME
 done
 
