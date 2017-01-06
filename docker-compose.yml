@@ -8,12 +8,12 @@ services:
     image: bencinmonitor/collect
     links:
       - redis
+      - mongo
     depends_on:
       - redis
+      - mongo
       - ocr_worker
     environment:
-      - REDIS_WORK_URL=redis://@redis:6379/0
-      - REDIS_DATA_URL=redis://@redis:6379/1
       - SLEEP_TIME=10
     volumes:
       - images:/home/collect/data/full
@@ -25,12 +25,12 @@ services:
     image: bencinmonitor/collect
     links:
       - redis
+      - mongo
     depends_on:
       - redis
+      - mongo
       - ocr_worker
     environment:
-      - REDIS_WORK_URL=redis://@redis:6379/0
-      - REDIS_DATA_URL=redis://@redis:6379/1
       - SLEEP_TIME=10
     volumes:
       - images:/home/collect/data/full
@@ -42,14 +42,10 @@ services:
     image: bencinmonitor/collect
     links:
       - redis
+      - mongo
     depends_on:
       - redis
-    environment:
-      - PYTHONIOENCODING=utf-8
-      - LC_ALL=C.UTF-8
-      - LANG=C.UTF-8
-      - REDIS_WORK_URL=redis://@redis:6379/0
-      - REDIS_DATA_URL=redis://@redis:6379/1
+      - mongo
     volumes:
       - images:/home/collect/data/full
     entrypoint: "python"
@@ -72,3 +68,6 @@ services:
   redis:
     image: redis:3.2
     restart: unless-stopped
+
+  mongo:
+    image: mongo:3

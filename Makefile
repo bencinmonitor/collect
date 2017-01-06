@@ -1,4 +1,4 @@
-.PHONY: clean docker-clean docker-clean-volumes
+.PHONY: clean docker-clean docker-clean-volumes test
 
 COLLECT_IMAGE=bencinmonitor/collect
 
@@ -15,6 +15,9 @@ docker-clean-containers:
 	docker ps -aq | xargs -n1 docker rm -vf
 
 docker-clean: | docker-clean-containers docker-clean-volumes
+
+test:
+	docker-compose -f docker-compose.test.yml run scraper
 
 clean: docker-clean
 	rm -rf data-redis/*

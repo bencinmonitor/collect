@@ -12,7 +12,7 @@ class StationsRedisPipeline(object):
     queue = None
 
     def open_spider(self, spider):
-        self.queue = Queue(REDIS_ITEMS_QUEUE, connection=from_url(REDIS_WORK_URL))
+        self.queue = Queue(REDIS_ITEMS_QUEUE, connection=from_url(REDIS_URL))
 
     def process_item(self, item, spider):
         item_as_json = dumps(item, cls=ScrapyJSONEncoder, ensure_ascii=False)

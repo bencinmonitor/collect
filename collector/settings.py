@@ -94,6 +94,6 @@ IMAGES_STORE = "data"
 # KAFKA_BOOTSTRAP_SERVERS = getenv('KAFKA_BOOTSTRAP_SERVERS', None)
 # KAFKA_SCRAPED_ITEMS_TOPIC = getenv('KAFKA_SCRAPED_ITEMS_TOPIC', 'scraped-items')
 
-REDIS_WORK_URL = getenv('REDIS_WORK_URL', 'redis://@0.0.0.0:6379/0')
-REDIS_DATA_URL = getenv('REDIS_DATA_URL', 'redis://@0.0.0.0:6379/1')
+REDIS_URL = getenv('REDIS_URL', 'redis://@redis:6379/0')
+MONGO_URL = getenv('MONGO_URL', 'mongodb://mongo:27017/')
 REDIS_ITEMS_QUEUE = getenv('REDIS_ITEMS_QUEUE', 'default')

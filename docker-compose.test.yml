@@ -5,17 +5,28 @@ services:
     image: bencinmonitor/collect
     links:
       - redis
+      - mongo
     depends_on:
       - redis
+      - mongo
     environment:
-      - REDIS_WORK_URL=redis://@redis:6379/0
-      - REDIS_DATA_URL=redis://@redis:6379/1
       - SLEEP_TIME=0
     volumes:
       - .:/home/collect
+    working_dir: /home/collect
+    # entrypoint: "bash"
     entrypoint: "python"
     command: "-m unittest"
 
   redis:
     image: redis:3.2
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:3
+    ports:
+      - "27017:27017"
+      - "27018:27018"
+      - "27019:27019"
+      - "28017:28017"
     restart: unless-stopped

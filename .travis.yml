@@ -13,7 +13,7 @@ before_script:
   - docker build -t bencinmonitor/collect .
 
 script:
-  - docker-compose -f docker-compose.test.yml run scraper
+  - docker-compose -f docker-compose.test.yml run scraper -m unittest --failfast -v
 
 after_script:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then

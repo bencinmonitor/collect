@@ -6,13 +6,17 @@ from ocr_machine.ocr import ocr_pipeline
 from utils.meta import PETROL_FUEL_NAMES, OMV_FUEL_NAMES, FUEL_NAMES, FUEL_CODES, REVERSED_FUEL_CODES
 from os.path import realpath, dirname, join, exists
 from pprint import pprint
-from redis import from_url
 from datetime import datetime
-from collector.settings import REDIS_DATA_URL
+from collector.settings import MONGO_URL
 from utils.dict import flatten_dict
+from pymongo import MongoClient, ASCENDING, DESCENDING, GEOSPHERE
 
-r = from_url(REDIS_DATA_URL)
+mongo = MongoClient(MONGO_URL)
+db = mongo['bm']
+db['stations'].drop()
 
+create_index_one = db['stations'].ensure_index([('key', ASCENDING)], unique=True)
+create_index_two = db['stations'].ensure_index([('loc', GEOSPHERE)])
 
 def process_station(station_as_string):
     station = loads(station_as_string, encoding='utf8')
@@ -25,6 +29,34 @@ def process_station(station_as_string):
 
 
 def save_station(station):
+    key = station['key']
+    name = station['name']
+    scraped_at = datetime.strptime(station['scraped_at'], '%Y-%m-%d %H:%M:%S')
+    timestamp = int(scraped_at.timestamp())
+
+    db['stations'].update_one({'key': key}, {
+        "$setOnInsert": {
+            'key': key,
+            'name': name,
+            'address': station['address'],
+            'xcode': station['xcode'],
+            'xid': station['xid'],
+            'prices': {FUEL_CODES[k]: v for k, v in station['prices'].items()},
+            'scraped_at': scraped_at,
+            'scraped_url': station['scraped_url'],
+            'loc': {
+                'type': 'Point',
+                'coordinates': [station['lon'], station['lat']]
+            }
+        },
+        "$set": {"last_update_date": datetime.utcnow()}
+    }, upsert=True)
+
+    db['stations']
+
+
+"""
+def save_station_x(station):
     key = station['key']
     name = station['name']
     scraped_at = station['scraped_at']
@@ -53,6 +85,8 @@ def save_station(station):
 
     # Price at location
     r.execute_command("GEOADD", "locations", station['lat'], station['lon'], key)
+"""
+
 
 def fix_image_path(path):
     images_path = join(dirname(dirname(realpath(__file__))), "data")

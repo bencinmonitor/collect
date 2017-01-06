@@ -5,7 +5,8 @@ MAINTAINER Oto Brglez <otobrglez@gmail.com>
 ENV DEBIAN_FRONTEND=noninteractive \
   LC_ALL=C.UTF-8 \
   LANG=C.UTF-8 \
-  LANGUAGE=C.UTF-8
+  LANGUAGE=C.UTF-8 \
+  PYTHONIOENCODING=utf-8
 
 RUN apt-get update -qy && \
   apt-get install -qy \
