@@ -10,7 +10,16 @@ Oil and gas price collector.
 docker build -t bencinmonitor/collect:latest .
 
 docker-compose -f docker-compose.yml -f docker-compose.local.yml up
+```
 
+## Development with Docker
+
+```bash
+docker-compose -f ./docker-compose.yml -f ./docker-compose.test.yml up mongo redis
+
+docker run -ti --rm  -v `pwd`:/home/collect --network collect_default \
+  --link collect_mongo_1:mongo --link collect_redis_1:redis \
+  --entrypoint python bencinmonitor/collect -m unittest
 ```
 
 ## Local setup notes
