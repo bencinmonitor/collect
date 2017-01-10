@@ -1,8 +1,7 @@
 import sys
-from collector.settings import REDIS_URL
+from collector.settings import REDIS_URL, MONGO_URL
 from redis import from_url
 from rq import Connection, Worker
-from ocr_machine.processor import process_station
 
 if __name__ == '__main__':
     with Connection(from_url(REDIS_URL)):

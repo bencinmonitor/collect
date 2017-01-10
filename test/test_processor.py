@@ -19,7 +19,7 @@ class TestProcessor(unittest.TestCase):
         # path = "./data/full/*.jpg"
         stations_data = [station_as_json(station) for station in stations(path)]
         results = [process_station(station) for station in stations_data]
-        first_result = results[0]
+        first_result = results[0]['prices']
 
         self.assertEqual(first_result['Q Max 95'], 1.206)
         self.assertEqual(first_result['Q Max 100'], 1.289)
@@ -31,7 +31,7 @@ class TestProcessor(unittest.TestCase):
         stations_data = [station_as_json(station) for station in stations(path, options={'scraper': 'omv'})]
         results = [process_station(station) for station in stations_data]
 
-        first_result = results[0]
+        first_result = results[0]['prices']
         self.assertEqual(first_result['OMV Avtoplin (LPG)'], 0.613)
         self.assertEqual(first_result['OMV Diesel'], 1.110)
 
@@ -43,7 +43,7 @@ class TestProcessor(unittest.TestCase):
         })
 
         station_json = station_as_json(station)
-        prices = process_station(station_json)
+        prices = process_station(station_json)['prices']
         self.assertEqual(prices['OMV Diesel'], 1.110)
 
     def test_saving(self):

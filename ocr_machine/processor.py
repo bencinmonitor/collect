@@ -12,7 +12,7 @@ from collector.settings import MONGO_URL
 from utils.dict import flatten_dict
 from pymongo import MongoClient, ASCENDING, DESCENDING, GEOSPHERE, HASHED
 
-db = MongoClient(MONGO_URL)['bm']
+db = MongoClient(MONGO_URL, connect=False)['bm']
 
 if getenv('DROP_STATIONS') == '1': db['stations'].drop()
 
@@ -32,7 +32,7 @@ def process_station(station_as_string):
     station['prices'] = prices
     save_station(station)
 
-    return prices
+    return {'key': station['key'], 'prices': prices}
 
 
 def save_station(station):
@@ -44,6 +44,14 @@ def save_station(station):
     minute = scraped_at.minute
     day_of_the_year = scraped_at.timetuple().tm_yday
     prices_dict = {FUEL_CODES[k]: v for k, v in station['prices'].items()}
+
+    data_to_set = flatten_dict({
+        'prices': prices_dict,
+        "prices_last_hour": {station: {str(minute): price} for station, price in prices_dict.items()},
+        "prices_last_24h": {station: {str(hour): price} for station, price in prices_dict.items()},
+        "prices_last_yday": {station: {str(day_of_the_year): price} for station, price in prices_dict.items()},
+        "updated_at": datetime.utcnow(),
+    }, '.')
 
     db['stations'].update_one({'key': key}, {
         "$setOnInsert": {
@@ -57,13 +65,7 @@ def save_station(station):
             'scraped_url': station['scraped_url'],
             'loc': {'type': 'Point', 'coordinates': [station['lon'], station['lat']]}
         },
-        "$set": {
-            'prices': prices_dict,
-            "prices_last_hour": {station: {str(minute): price} for station, price in prices_dict.items()},
-            "prices_last_24h": {station: {str(hour): price} for station, price in prices_dict.items()},
-            "prices_last_yday": {station: {str(day_of_the_year): price} for station, price in prices_dict.items()},
-            "updated_at": datetime.utcnow(),
-        }
+        "$set": data_to_set
     }, upsert=True)
 
     return station
