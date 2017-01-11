@@ -61,7 +61,7 @@ def save_station(station):
 
     data_to_set = flatten_dict(pre_normalize, '.')
 
-    pprint(data_to_set)
+    # TODO: If u need to hack ~> pprint(data_to_set)
 
     db['stations'].update_one({'key': key}, {
         "$setOnInsert": {
