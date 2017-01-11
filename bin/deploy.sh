@@ -21,6 +21,6 @@ on_remote "docker pull $DOCKER_IMAGE"
 
 on_remote "mkdir -p $DATA_PATH/{redis,mongo,images}"
 
-on_remote "docker volume create --opt type=none --opt device=$DATA_PATH/images --opt o=bind --name collect_images"
-on_remote "docker volume create --opt type=none --opt device=$DATA_PATH/redis --opt o=bind --name collect_redis_data"
-on_remote "docker volume create --opt type=none --opt device=$DATA_PATH/mongo --opt o=bind --name collect_mongo_data"
+on_remote "docker volume create --opt type=none --opt device=$DATA_PATH/images --opt o=bind --name collect_images && \
+  docker volume create --opt type=none --opt device=$DATA_PATH/redis --opt o=bind --name collect_redis_data && \
+  docker volume create --opt type=none --opt device=$DATA_PATH/mongo --opt o=bind --name collect_mongo_data"
