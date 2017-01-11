@@ -4,7 +4,7 @@ from os import getenv
 import re
 from json import loads
 from ocr_machine.ocr import ocr_pipeline
-from utils.meta import PETROL_FUEL_NAMES, OMV_FUEL_NAMES, FUEL_NAMES, FUEL_CODES, REVERSED_FUEL_CODES
+from utils.meta import PETROL_FUEL_NAMES, OMV_FUEL_NAMES, FUEL_NAMES, FUEL_CODES, REVERSED_FUEL_CODES, ALL_FUEL_NAMES
 from os.path import realpath, dirname, join, exists
 from pprint import pprint
 from datetime import datetime
@@ -43,15 +43,25 @@ def save_station(station):
     hour = scraped_at.hour
     minute = scraped_at.minute
     day_of_the_year = scraped_at.timetuple().tm_yday
-    prices_dict = {FUEL_CODES[k]: v for k, v in station['prices'].items()}
+    prices_dict = generalize_prices({FUEL_CODES[k]: v for k, v in station['prices'].items()})
 
-    data_to_set = flatten_dict({
+    pre_normalize = {
         'prices': prices_dict,
-        "prices_last_hour": {station: {str(minute): price} for station, price in prices_dict.items()},
-        "prices_last_24h": {station: {str(hour): price} for station, price in prices_dict.items()},
-        "prices_last_yday": {station: {str(day_of_the_year): price} for station, price in prices_dict.items()},
+        'prices_yearly': {
+            str(scraped_at.year): {station: {
+                str(day_of_the_year): price} for station, price in prices_dict.items()
+                                   }
+        },
+        'prices_last_24h': {
+            station: {
+                str(scraped_at.hour): price} for station, price in prices_dict.items()
+            },
         "updated_at": datetime.utcnow(),
-    }, '.')
+    }
+
+    data_to_set = flatten_dict(pre_normalize, '.')
+
+    pprint(data_to_set)
 
     db['stations'].update_one({'key': key}, {
         "$setOnInsert": {
@@ -91,6 +101,14 @@ def compute_prices(station):
     return prices
 
 
+def generalize_prices(prices):
+    general_types = dict()
+    for key, value in prices.items():
+        general_type = ALL_FUEL_NAMES[REVERSED_FUEL_CODES[key]][2]
+        general_types[general_type] = value
+    return {**prices, **general_types}
+
+
 def process_prices(station, text):
     if station['scraper'] == "petrol":
         return process_petrol_prices(station, text)
@@ -102,14 +120,14 @@ def process_prices(station, text):
 
 def process_petrol_prices(station, text, names=PETROL_FUEL_NAMES):
     prices = [float(x.replace(",", ".", 1)) for x in re.findall(r"(\d{1},\d{3,3})", text)]
-    labels = [k for k, (pattern, flags) in names if re.search(pattern, text, flags)]
+    labels = [k for k, (pattern, flags, type) in names if re.search(pattern, text, flags)]
     result = dict(zip(labels, prices))
     return result
 
 
 def process_omv_prices(station, text, names=OMV_FUEL_NAMES):
     prices = [float(x.replace(",", ".", 1)) for x in re.findall(r"(\d{1},\d{3,3})", text)]
-    labels = [k for k, (pattern, flags) in names if re.search(pattern, text, flags)]
+    labels = [k for k, (pattern, flags, type) in names if re.search(pattern, text, flags)]
 
     if len(labels) != len(prices):
         print("Station %s" % station['name'])

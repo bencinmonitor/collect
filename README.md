@@ -22,6 +22,19 @@ docker run -ti --rm  -v `pwd`:/home/collect --network collect_default \
   --entrypoint python bencinmonitor/collect -m unittest
 ```
 
+## Debugging with Docker and pydevd
+
+```bash
+sudo ifconfig lo0 alias 10.8.8.8 netmask 255.255.255.255 up
+
+docker run --privileged --host net --...
+```
+
+```python
+from pydevd import settrace
+settrace('10.8.8.8', port=10000, stdoutToServer=True, stderrToServer=True)
+```
+
 ## Local setup notes
 
 Prepare Python3 with virtualenv wrapper.
