@@ -2,36 +2,42 @@ version: '2'
 
 volumes:
   images:
+    driver: local
+  redis_data:
+    driver: local
+  mongo_data:
+    driver: local
 
 services:
   scrape_petrol:
     volumes:
-      - .:/home/collect
       - images:/home/collect/data/full
-    command: "./bin/run-sleep.sh scrapy crawl petrol -L DEBUG"
+    command: "./bin/run-sleep.sh scrapy crawl petrol -L INFO"
 
   scrape_omv:
     volumes:
-      - .:/home/collect
       - images:/home/collect/data/full
-    command: "./bin/run-sleep.sh scrapy crawl omv -L DEBUG"
+    command: "./bin/run-sleep.sh scrapy crawl omv -L INFO"
 
   ocr_worker:
+    environment:
+      - LOG_LEVEL=INFO
     volumes:
-      - .:/home/collect
       - images:/home/collect/data/full
 
   rq_monitor:
     ports:
       - 9181:9181
-    volumes:
-      - .:/home/collect
 
   redis:
+    volumes:
+      - redis_data:/data
     ports:
       - "6379:6379"
 
   mongo:
+    volumes:
+      - mongo_data:/data/db
     ports:
       - "27017:27017"
       - "27018:27018"

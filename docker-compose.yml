@@ -1,8 +1,5 @@
 version: '2'
 
-volumes:
-  images:
-
 services:
   scrape_petrol:
     image: bencinmonitor/collect
@@ -15,8 +12,6 @@ services:
       - ocr_worker
     environment:
       - SLEEP_TIME=10
-    volumes:
-      - images:/home/collect/data/full
     entrypoint: "bash"
     command: "./bin/run-sleep.sh scrapy crawl petrol -L INFO"
     restart: unless-stopped
@@ -32,8 +27,6 @@ services:
       - ocr_worker
     environment:
       - SLEEP_TIME=10
-    volumes:
-      - images:/home/collect/data/full
     entrypoint: "bash"
     command: "./bin/run-sleep.sh scrapy crawl omv -L INFO"
     restart: unless-stopped
@@ -46,8 +39,6 @@ services:
     depends_on:
       - redis
       - mongo
-    volumes:
-      - images:/home/collect/data/full
     entrypoint: "python"
     command: "-m ocr_machine.workers default"
     restart: unless-stopped

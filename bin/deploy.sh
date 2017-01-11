@@ -6,6 +6,7 @@ set -ex
 HOST=a1.univizor.si
 BRANCH=master
 REPO_PATH="~/repos/collect"
+DATA_PATH="/srv/data/collect"
 DOCKER_IMAGE="bencinmonitor/collect"
 
 on_remote () {
@@ -17,3 +18,5 @@ on_remote "[ -d "$REPO_PATH" ] || (mkdir -p $REPO_PATH && git clone --depth=1 --
 on_remote "cd $REPO_PATH && git fetch --all && git reset --hard origin/master && git pull"
 
 on_remote "docker pull $DOCKER_IMAGE"
+
+on_remote "mkdir -p $DATA_PATH/{redis,mongo,images}"
