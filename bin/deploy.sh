@@ -26,11 +26,11 @@ on_remote "docker pull $DOCKER_IMAGE"
 on_remote "mkdir -p $DATA_PATH/{redis,mongo,images}"
 
 # Volumes
-on_remote "docker volume create --opt type=none --opt device=$DATA_PATH/images --opt o=bind --name collect_images"
-on_remote "docker volume create --opt type=none --opt device=$DATA_PATH/redis --opt o=bind --name collect_redis_data"
-on_remote "docker volume create --opt type=none --opt device=$DATA_PATH/mongo --opt o=bind --name collect_mongo_data"
+#on_remote "docker volume create --opt type=none --opt device=$DATA_PATH/images --opt o=bind --name collect_images"
+#on_remote "docker volume create --opt type=none --opt device=$DATA_PATH/redis --opt o=bind --name collect_redis_data"
+#on_remote "docker volume create --opt type=none --opt device=$DATA_PATH/mongo --opt o=bind --name collect_mongo_data"
 
 # Restart
-on_remote "cd $REPO_PATH && docker-compose build scrape_omv && docker-compose up --no-deps -d scrape_omv"
-on_remote "cd $REPO_PATH && docker-compose build scrape_petrol && docker-compose up --no-deps -d scrape_petrol"
-on_remote "cd $REPO_PATH && docker-compose build ocr_worker && docker-compose up --no-deps -d ocr_worker"
+#on_remote "cd $REPO_PATH && docker-compose build scrape_omv && docker-compose up --no-deps -d scrape_omv"
+#on_remote "cd $REPO_PATH && docker-compose build scrape_petrol && docker-compose up --no-deps -d scrape_petrol"
+#on_remote "cd $REPO_PATH && docker-compose build ocr_worker && docker-compose up --no-deps -d ocr_worker"

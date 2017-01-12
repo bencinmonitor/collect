@@ -35,6 +35,12 @@ from pydevd import settrace
 settrace('10.8.8.8', port=10000, stdoutToServer=True, stderrToServer=True)
 ```
 
+## MongoDB index problems
+
+```javascript
+db.getSiblingDB('admin').runCommand( { setParameter: 1, failIndexKeyTooLong: false } )
+```
+
 ## Local setup notes
 
 Prepare Python3 with virtualenv wrapper.

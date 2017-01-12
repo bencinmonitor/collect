@@ -1,0 +1,1 @@
+db.getCollection('stations').find({'company': 'petrol'}, {'prices_last_24h.bencin-95': 1})
