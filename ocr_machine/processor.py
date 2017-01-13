@@ -2,20 +2,21 @@
 
 from os import getenv
 import re
-from json import loads
+from json import loads, dumps
 from ocr_machine.ocr import ocr_pipeline
 from utils.meta import PETROL_FUEL_NAMES, OMV_FUEL_NAMES, FUEL_NAMES, FUEL_CODES, REVERSED_FUEL_CODES, ALL_FUEL_NAMES
 from os.path import realpath, dirname, join, exists
 from pprint import pprint
 from datetime import datetime
-from collector.settings import MONGO_URL
+from collector.settings import MONGO_URL, REDIS_PUBSUB_URL
 from utils.dict import flatten_dict
 from pymongo import MongoClient, ASCENDING, DESCENDING, GEOSPHERE, HASHED
+from rq import use_connection, get_current_connection
+from redis import from_url, Redis, ConnectionPool, StrictRedis
 
+# MongoDB
 db = MongoClient(MONGO_URL, connect=False)['bm']
-
 if getenv('DROP_STATIONS') == '1': db['stations'].drop()
-
 create_index_key = db['stations'].ensure_index([('key', ASCENDING)], unique=True, cache_for=4000)
 create_index_loc = db['stations'].ensure_index([('loc', GEOSPHERE)], cache_for=4000)
 db['stations'].ensure_index([('company', ASCENDING)], cache_for=4000)
@@ -23,15 +24,25 @@ db['stations'].ensure_index([('prices', ASCENDING)], cache_for=4000)
 db['stations'].ensure_index([('prices_yearly', ASCENDING)], cache_for=4000)
 db['stations'].ensure_index([('prices_last_24h', ASCENDING)], cache_for=4000)
 
+# Redis pool (second)
+redis_pool = ConnectionPool.from_url(REDIS_PUBSUB_URL)
+
 
 def process_station(station_as_string):
     station = loads(station_as_string, encoding='utf8')
     prices = compute_prices(station)
 
     station['prices'] = prices
-    save_station(station)
+    saved_station, result = save_station(station)
 
-    return {'key': station['key'], 'prices': prices}
+    r = Redis(connection_pool=redis_pool)
+    publish_result = r.publish("events.station_update", dumps({
+        'type': 'station_update',
+        'meta': {'matched_count': result.matched_count, 'modified_count': result.modified_count},
+        'record': saved_station
+    }, ensure_ascii=False))
+
+    return {'key': station['key'], 'prices': prices, 'publish_result': publish_result}
 
 
 def save_station(station):
@@ -62,7 +73,7 @@ def save_station(station):
 
     # TODO: If u need to hack ~> pprint(data_to_set)
 
-    db['stations'].update_one({'key': key}, {
+    result = db['stations'].update_one({'key': key}, {
         "$setOnInsert": {
             'key': key,
             'name': name,
@@ -77,7 +88,7 @@ def save_station(station):
         "$set": data_to_set
     }, upsert=True)
 
-    return station
+    return [station, result]
 
 
 def fix_image_path(path):

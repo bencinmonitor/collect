@@ -17,6 +17,9 @@ class Station(scrapy.Item):
     xcode = scrapy.Field()  # Internal ID if possible
     key = scrapy.Field()
 
+    # TODO: services
+    # TODO: schedule
+
     @staticmethod
     def generate_key():
         return uuid4()

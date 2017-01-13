@@ -95,5 +95,6 @@ IMAGES_STORE = "data"
 # KAFKA_SCRAPED_ITEMS_TOPIC = getenv('KAFKA_SCRAPED_ITEMS_TOPIC', 'scraped-items')
 
 REDIS_URL = getenv('REDIS_URL', 'redis://@redis:6379/0')
+REDIS_PUBSUB_URL = getenv('REDIS_URL', 'redis://@redis:6379/3')
 MONGO_URL = getenv('MONGO_URL', 'mongodb://mongo:27017/')
 REDIS_ITEMS_QUEUE = getenv('REDIS_ITEMS_QUEUE', 'default')
