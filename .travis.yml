@@ -1,11 +1,13 @@
 sudo: required
-
 language: python
+install: true
 
 services:
   - docker
 
-install: true
+cache:
+  directories:
+    - $HOME/.docker
 
 before_script:
   - echo "Travis branch is $TRAVIS_BRANCH"
