@@ -10,11 +10,11 @@ services:
       - images:/home/collect/data/full
     command: "./bin/run-sleep.sh scrapy crawl petrol -L DEBUG"
 
-  scrape_omv:
-    volumes:
-      - .:/home/collect
-      - images:/home/collect/data/full
-    command: "./bin/run-sleep.sh scrapy crawl omv -L DEBUG"
+# scrape_omv:
+#     volumes:
+#      - .:/home/collect
+#      - images:/home/collect/data/full
+#    command: "./bin/run-sleep.sh scrapy crawl omv -L DEBUG"
 
   ocr_worker:
     volumes:

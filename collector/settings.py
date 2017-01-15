@@ -21,7 +21,7 @@ DOWNLOAD_DELAY = int(getenv("DOWNLOAD_DELAY", "2"))
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
-DOWNLOAD_TIMEOUT = 60
+DOWNLOAD_TIMEOUT = 120
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = False

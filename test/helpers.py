@@ -31,7 +31,24 @@ def build_station(options=None):
         "address": "Ormoška cesta 26b, 2250 Ptuj",
         "lat": 46.41676013,
         "lon": 15.88049476,
-        "xid": "1720"
+        "xid": "1720",
+        'services': {'caj_na_poti': 1,
+                     'euroshell': 1,
+                     'wifi': 1},
+        'services_humans': {'caj_na_poti': 'Čaj na poti',
+                            'euroshell': 'Euroshell',
+                            'uta': 'UTA',
+                            'wifi': 'WIFI'},
+        'shopping_hours': {'friday': {'close': 2200, 'open': 600},
+                           'monday': {'close': 2200, 'open': 600},
+                           'saturday': {'close': 2200, 'open': 600},
+                           'sunday': {'close': 2200, 'open': 800},
+                           'thursday': {'close': 2200, 'open': 600},
+                           'tuesday': {'close': 2200, 'open': 600},
+                           'wednesday': {'close': 2200, 'open': 600}},
+        'shopping_hours_humans': {'nedelje in prazniki': '8:00 - 22:00',
+                                  'sobote': '6:00 - 22:00',
+                                  'vsak delavnik': '6:00 - 22:00'},
     }
     return {**defaults, **options}
 

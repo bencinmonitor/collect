@@ -16,9 +16,10 @@ class Station(scrapy.Item):
     xid = scrapy.Field()  # ID on page
     xcode = scrapy.Field()  # Internal ID if possible
     key = scrapy.Field()
-
-    # TODO: services
-    # TODO: schedule
+    services = scrapy.Field()
+    services_humans = scrapy.Field()
+    shopping_hours = scrapy.Field()
+    shopping_hours_humans = scrapy.Field()
 
     @staticmethod
     def generate_key():

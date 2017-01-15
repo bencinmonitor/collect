@@ -20,7 +20,7 @@ on_remote "[ -d "$REPO_PATH" ] || (mkdir -p $REPO_PATH && git clone --depth=1 --
 on_remote "cd $REPO_PATH && git fetch --all && git reset --hard origin/master && git pull"
 
 # Pull image
-on_remote "docker pull $DOCKER_IMAGE"
+on_remote "docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" && docker pull --disable-content-trust $DOCKER_IMAGE"
 
 # Crete paths
 on_remote "mkdir -p $DATA_PATH/{redis,mongo,images}"
@@ -33,4 +33,4 @@ on_remote "mkdir -p $DATA_PATH/{redis,mongo,images}"
 # Restart
 #on_remote "cd $REPO_PATH && docker-compose build scrape_omv && docker-compose up --no-deps -d scrape_omv"
 #on_remote "cd $REPO_PATH && docker-compose build scrape_petrol && docker-compose up --no-deps -d scrape_petrol"
-#on_remote "cd $REPO_PATH && docker-compose build ocr_worker && docker-compose up --no-deps -d ocr_worker"
+on_remote "cd $REPO_PATH && docker-compose build ocr_worker && docker-compose up --no-deps -d ocr_worker"
