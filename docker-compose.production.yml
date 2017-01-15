@@ -43,3 +43,19 @@ services:
       - "27018:27018"
       - "27019:27019"
       - "28017:28017"
+
+  api:
+    image: bencinmonitor/api
+    links:
+      - redis
+      - mongo
+    depends_on:
+      - redis
+      - mongo
+    ports:
+      - "7766:7766"
+    environment:
+      - DEBUG=True
+      - MONGO_URL=mongodb://mongo:27017/bm
+      - REDIS_URL=redis://@redis:6379/1
+    restart: unless-stopped

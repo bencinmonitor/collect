@@ -33,4 +33,4 @@ on_remote "mkdir -p $DATA_PATH/{redis,mongo,images}"
 # Restart
 #on_remote "cd $REPO_PATH && docker-compose build scrape_omv && docker-compose up --no-deps -d scrape_omv"
 #on_remote "cd $REPO_PATH && docker-compose build scrape_petrol && docker-compose up --no-deps -d scrape_petrol"
-on_remote "cd $REPO_PATH && docker-compose build ocr_worker && docker-compose up --no-deps -d ocr_worker"
+# on_remote "cd $REPO_PATH && docker-compose build ocr_worker && docker-compose up --no-deps -d ocr_worker"
