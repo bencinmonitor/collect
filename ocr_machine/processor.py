@@ -22,9 +22,9 @@ create_index_key = db['stations'].ensure_index([('key', ASCENDING)], unique=True
 create_index_loc = db['stations'].ensure_index([('loc', GEOSPHERE)], cache_for=4000)
 db['stations'].ensure_index([('company', ASCENDING)], cache_for=4000)
 db['stations'].ensure_index([('prices', ASCENDING)], cache_for=4000)
-db['stations'].ensure_index([('prices_yearly', ASCENDING)], cache_for=4000)
-db['stations'].ensure_index([('prices_last_24h', ASCENDING)], cache_for=4000)
-db['stations'].ensure_index([('services', ASCENDING)], cache_for=4000)
+# db['stations'].ensure_index([('prices_yearly', ASCENDING)], cache_for=4000)
+# db['stations'].ensure_index([('prices_last_24h', ASCENDING)], cache_for=4000)
+# db['stations'].ensure_index([('services', ASCENDING)], cache_for=4000)
 
 # Redis Connection pool
 redis_pool = ConnectionPool.from_url(REDIS_PUBSUB_URL)
