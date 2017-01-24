@@ -14,10 +14,10 @@ services:
       - collect_images:/home/collect/data/full
     command: "./bin/run-sleep.sh scrapy crawl petrol -L INFO"
 
-#  scrape_omv:
-#    volumes:
-#      - collect_images:/home/collect/data/full
-#    command: "./bin/run-sleep.sh scrapy crawl omv -L INFO"
+  scrape_omv:
+    volumes:
+      - collect_images:/home/collect/data/full
+    command: "./bin/run-sleep.sh scrapy crawl omv -L INFO"
 
   ocr_worker:
     environment:

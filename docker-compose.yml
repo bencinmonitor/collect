@@ -16,20 +16,20 @@ services:
     command: "./bin/run-sleep.sh scrapy crawl petrol -L INFO"
     restart: unless-stopped
 
-#  scrape_omv:
-#    image: bencinmonitor/collect
-#    links:
-#      - redis
-#      - mongo
-#    depends_on:
-#      - redis
-#      - mongo
-#      - ocr_worker
-#    environment:
-#      - SLEEP_TIME=10
-#    entrypoint: "bash"
-#    command: "./bin/run-sleep.sh scrapy crawl omv -L INFO"
-#    restart: unless-stopped
+  scrape_omv:
+    image: bencinmonitor/collect
+    links:
+      - redis
+      - mongo
+    depends_on:
+      - redis
+      - mongo
+      - ocr_worker
+    environment:
+      - SLEEP_TIME=10
+    entrypoint: "bash"
+    command: "./bin/run-sleep.sh scrapy crawl omv -L INFO"
+    restart: unless-stopped
 
   ocr_worker:
     image: bencinmonitor/collect
