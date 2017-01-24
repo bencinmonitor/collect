@@ -8,9 +8,12 @@ from utils.meta import PETROL_FUEL_NAMES, OMV_FUEL_NAMES, FUEL_NAMES, FUEL_CODES
 from os.path import realpath, dirname, join, exists
 from pprint import pprint
 from datetime import datetime
-from collector.settings import MONGO_URL
+from collector.settings import MONGO_URL, REDIS_PUBSUB_URL
 from utils.dict import flatten_dict
 from pymongo import MongoClient, ASCENDING, DESCENDING, GEOSPHERE, HASHED
+from rq import use_connection, get_current_connection
+from redis import from_url, Redis, ConnectionPool, StrictRedis
+
 
 # MongoDB
 db = MongoClient(MONGO_URL, connect=False)['bm']
@@ -23,12 +26,36 @@ db['stations'].ensure_index([('prices_yearly', ASCENDING)], cache_for=4000)
 db['stations'].ensure_index([('prices_last_24h', ASCENDING)], cache_for=4000)
 db['stations'].ensure_index([('services', ASCENDING)], cache_for=4000)
 
+# Redis Connection pool
+redis_pool = ConnectionPool.from_url(REDIS_PUBSUB_URL)
+
 def process_station(station_as_string):
     station = loads(station_as_string, encoding='utf8')
     station['prices'] = compute_prices(station)
-    save_station(station)
-    return {'key': station['key'], 'prices': station['prices']}
+    saved_station, result = save_station(station)
+    publish_result = publish_to_eventbus(saved_station, result)
+    return {'key': station['key'], 'prices': station['prices'], 'publish_result': publish_result}
 
+def publish_to_eventbus(saved_station, result):
+    r = Redis(connection_pool=redis_pool)
+    publish_result= None
+    meta = {'matched_count': result.matched_count, 'modified_count': result.modified_count}
+
+    if result.modified_count == 0 and result.matched_count == 0 and result.upserted_id is not None:
+        meta['upserted_id'] = str(result.upserted_id)
+        publish_result= r.publish("events.station_insert", dumps({
+            'type': 'station_insert',
+            'meta': meta,
+            'record': saved_station
+        }, ensure_ascii=False))
+    else:
+        publish_result= r.publish("events.station_update", dumps({
+            'type': 'station_update',
+            'meta': meta,
+            'record': saved_station
+        }, ensure_ascii=False))
+
+    return publish_result
 
 def save_station(station):
     key = station['key']
@@ -41,27 +68,26 @@ def save_station(station):
     prices_dict = generalize_prices({FUEL_CODES[k]: v for k, v in station['prices'].items()})
 
     meta = {}
-    for k in ['services', 'services_humans', 'shopping_hours', 'shopping_hours_humans']:
-        meta[k] = station.get(k, {})
+    for k in ['services', 'services_humans', 'shopping_hours', 'shopping_hours_humans']: meta[k] = station.get(k, {})
 
     pre_normalize = {
-        'meta': meta,
-        'updated_at': datetime.utcnow()
-    }
-
-    if prices_dict != {}:
-        pre_normalize['prices'] = prices_dict,
-        pre_normalize['prices_yearly'] = {
+        'prices': prices_dict,
+        'prices_yearly': {
             str(scraped_at.year): {station: {
                 str(day_of_the_year): price} for station, price in prices_dict.items()
                                    }
-        }
-        pre_normalize['prices_last_24h'] = {
-            station: { str(scraped_at.hour): price} for station, price in prices_dict.items()},
+        },
+        'prices_last_24h': {
+            station: {
+                str(scraped_at.hour): price} for station, price in prices_dict.items()
+        },
+        'meta': meta,
+        'updated_at': datetime.utcnow(),
+    }
 
     data_to_set = flatten_dict(pre_normalize, '.')
 
-    db['stations'].update_one({'key': key}, {
+    result = db['stations'].update_one({'key': key}, {
         "$setOnInsert": {
             'key': key,
             'name': name,
@@ -76,7 +102,7 @@ def save_station(station):
         "$set": data_to_set
     }, upsert=True)
 
-    return station
+    return [station, result]
 
 
 def fix_image_path(path):
