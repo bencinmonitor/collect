@@ -43,6 +43,7 @@ services:
       - "27018:27018"
       - "27019:27019"
       - "28017:28017"
+    command: "--smallfiles --setParameter failIndexKeyTooLong=false"
 
   api:
     image: bencinmonitor/api
